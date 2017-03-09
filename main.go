@@ -13,7 +13,7 @@ func handler(c *gin.Context) {
 	areas, _ := GetAreas()
 	areaID, _ := strconv.Atoi(c.Param("areaId"))
 	if areaID == 0 {
-		areaID = areas[0].ID
+		areaID = 1
 	}
 	currentArea := Area{}
 	for _, area := range areas {
