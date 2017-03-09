@@ -12,8 +12,10 @@ type Area struct {
 }
 
 type Restaurant struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
+	ID      int    `json:"id"`
+	Name    string `json:"name"`
+	Link    string `json:"url"`
+	Address string `json:"address"`
 }
 
 type Menu struct {
@@ -21,17 +23,27 @@ type Menu struct {
 	Properties []string `json:"properties"`
 }
 
-type RestaurantMenus map[string][]Menu
-
-type Menus map[string]RestaurantMenus
-
-type MenuStruct struct {
-	menus Menus
+func (menu Menu) GetPropertyString() string {
+	props := ""
+	count := len(menu.Properties)
+	for i, p := range menu.Properties {
+		props += p
+		if i < count-1 {
+			props += ", "
+		}
+	}
+	return props
 }
 
-func (menus MenuStruct) getMenu(restaurantID int) ([]Menu, error) {
+type RestaurantMenus map[string][]Menu
+
+type Menus struct {
+	value map[string]RestaurantMenus
+}
+
+func (menus Menus) GetMenu(restaurantID int) []Menu {
 	date := time.Now()
-	restaurantMenus := menus.menus[strconv.Itoa(restaurantID)]
+	restaurantMenus := menus.value[strconv.Itoa(restaurantID)]
 	menu := restaurantMenus[date.Format("2006-01-02")]
-	return menu, nil
+	return menu
 }

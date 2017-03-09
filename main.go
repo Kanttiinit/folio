@@ -27,7 +27,7 @@ func handler(c *gin.Context) {
 		"areas":       areas,
 		"currentArea": currentArea,
 		"restaurants": restaurants,
-		"menus":       &menus,
+		"menus":       menus,
 	})
 }
 

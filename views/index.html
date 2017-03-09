@@ -17,7 +17,7 @@
 
     .area-list li {
       display: inline-block;
-      margin: 0 0.5ch 0;
+      margin: 0 1ch 0 0;
     }
 
     .area-list li.current {
@@ -27,6 +27,15 @@
     .restaurant-list {
       list-style-type: none;
       padding: 0;
+    }
+    
+    .restaurant h3 {
+      margin-bottom: 0;
+    }
+
+    .restaurant-address {
+      font-size: 0.8em;
+      text-decoration: none;
     }
   </style>
 </head>
@@ -43,7 +52,13 @@
   <ul class="restaurant-list">
     {{range .restaurants}}
     <li class="restaurant">
-      <h3>{{.Name}}</h3>
+      <a href="{{.Link}}"><h3>{{.Name}}</h3></a>
+      <a class="restaurant-address" href="https://www.google.fi/maps/search/{{.Address}}">{{.Address}}</a>
+      <ul>
+      {{range $menus.GetMenu .ID}}
+        <li>{{.Title}} ({{.GetPropertyString}})</li>
+      {{end}}
+      </ul>
     </li>
     {{end}}
   </ul>

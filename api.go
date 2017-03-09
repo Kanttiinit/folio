@@ -43,13 +43,13 @@ func GetRestaurants(area Area) ([]Restaurant, error) {
 	return restaurants, nil
 }
 
-func GetMenus(area Area) (MenuStruct, error) {
+func GetMenus(area Area) (Menus, error) {
 	restaurantIds := getRestaurantIDString(area)
 	resp, err := http.Get("https://kitchen.kanttiinit.fi/menus?restaurants=" + restaurantIds)
 	if err != nil {
-		return MenuStruct{}, err
+		return Menus{}, err
 	}
 	menus := Menus{}
-	json.NewDecoder(resp.Body).Decode(&menus)
-	return MenuStruct{menus}, nil
+	json.NewDecoder(resp.Body).Decode(&menus.value)
+	return menus, nil
 }
