@@ -10,7 +10,7 @@ import (
 )
 
 func handler(c *gin.Context) {
-	areas, _ := GetAreas()
+	areas := GetAreas()
 	areaID, _ := strconv.Atoi(c.Param("areaId"))
 	if areaID == 0 {
 		areaID = 1
@@ -21,7 +21,7 @@ func handler(c *gin.Context) {
 			currentArea = area
 		}
 	}
-	restaurants, _ := GetRestaurants(currentArea)
+	restaurants := GetRestaurants(currentArea)
 	menus, _ := GetMenus(currentArea)
 	c.HTML(http.StatusOK, "index.html", gin.H{
 		"areas":       areas,

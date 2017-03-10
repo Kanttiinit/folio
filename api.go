@@ -6,6 +6,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func getRestaurantIDString(area Area) string {
@@ -16,7 +17,10 @@ func getRestaurantIDString(area Area) string {
 	return restaurantIds
 }
 
-func GetAreas() ([]Area, error) {
+var areas []Area
+var areasLastFetched time.Time
+
+func fetchAreas() ([]Area, error) {
 	resp, err := http.Get("https://kitchen.kanttiinit.fi/areas?idsOnly=1")
 	if err != nil {
 		return nil, err
@@ -29,18 +33,26 @@ func GetAreas() ([]Area, error) {
 	return areas, nil
 }
 
-func GetRestaurants(area Area) ([]Restaurant, error) {
+func GetAreas() []Area {
+	if areas == nil || time.Now().Sub(areasLastFetched).Minutes() > 30 {
+		areas, _ = fetchAreas()
+		areasLastFetched = time.Now()
+	}
+	return areas
+}
+
+func GetRestaurants(area Area) []Restaurant {
 	restaurantIds := getRestaurantIDString(area)
 	resp, err := http.Get("https://kitchen.kanttiinit.fi/restaurants?ids=" + restaurantIds)
 	if err != nil {
-		return nil, err
+		return []Restaurant{}
 	}
 	restaurants := []Restaurant{}
 	json.NewDecoder(resp.Body).Decode(&restaurants)
 	sort.Slice(restaurants, func(i, j int) bool {
 		return strings.Compare(restaurants[i].Name, restaurants[j].Name) < 0
 	})
-	return restaurants, nil
+	return restaurants
 }
 
 func GetMenus(area Area) (Menus, error) {
