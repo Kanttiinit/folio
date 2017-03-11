@@ -20,7 +20,7 @@
       margin: 0 1ch 0 0;
     }
 
-    .area-list li.current {
+    .current {
       font-weight: bold;
     }
 
@@ -43,24 +43,32 @@
 </head>
 <body>
   {{$currentArea := .currentArea}}
+  {{$lang := .lang}}
   <ul class="area-list">
   {{range .areas}}
     <li class="{{ if eq .ID $currentArea.ID }}current{{end}}">
-      <a href="/{{.ID}}">{{.Name}}</a>
+      <a href="/{{.ID}}?lang={{$lang}}">{{.Name}}</a>
     </li>
   {{end}}
   </ul>
+  <a class="{{if eq $lang "fi"}}current{{end}}" href="?lang=fi">Finnish</a>
+  <a class="{{if eq $lang "en"}}current{{end}}" href="?lang=en">English</a>
   {{$menus := .menus}}
   <ul class="restaurant-list">
     {{range .restaurants}}
     <li class="restaurant">
       <a href="{{.Link}}"><h3>{{.Name}}</h3></a>
       <a class="restaurant-address" href="https://www.google.fi/maps/search/{{.Address}}">{{.Address}}</a>
+      {{$menu := $menus.GetMenu .ID}}
+      {{if not $menu}}
+      <small>No menu.</small>
+      {{else}}
       <ul>
-      {{range $menus.GetMenu .ID}}
+      {{range $menu}}
         <li>{{.Title}} ({{.GetPropertyString}})</li>
       {{end}}
       </ul>
+      {{end}}
     </li>
     {{end}}
   </ul>
