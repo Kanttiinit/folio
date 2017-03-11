@@ -11,10 +11,8 @@ var timestamps = map[string]time.Time{}
 
 func HttpGet(url string, maxAge time.Duration) ([]byte, error) {
 	if responses[url] != nil && time.Now().Sub(timestamps[url]) < maxAge {
-		println("cache hit", url)
 		return responses[url], nil
 	}
-	println("cache miss", url)
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
