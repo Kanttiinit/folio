@@ -27,6 +27,7 @@ func handler(c *gin.Context) {
 	}
 	restaurants := GetRestaurants(lang, currentArea)
 	menus, _ := GetMenus(lang, currentArea)
+	c.Header("Cache-Control", "max-age=600")
 	c.HTML(http.StatusOK, "index.html", gin.H{
 		"areas":       areas,
 		"currentArea": currentArea,
