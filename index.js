@@ -1,13 +1,21 @@
 const express = require('express');
 const twig = require('twig');
-const apicache = require('apicache');
 const fetch = require('node-fetch');
 const moment = require('moment');
 const ua = require('universal-analytics');
 
-const get = async resource => {
+const cache = new Map();
+
+const get = async (resource, ttl = 600) => {
+  const existing = cache.get(resource);
+  const now = Math.round(Date.now() / 1000);
+  if (existing && existing.expires > now) {
+    return existing.data;
+  }
   const response = await fetch(`https://kitchen.kanttiinit.fi/${resource}`);
-  return response.json();
+  const data = await response.json();
+  cache.set(resource, {data, expires: now + ttl});
+  return data;
 }
 
 express()
@@ -23,15 +31,15 @@ express()
   const areaId = Number(req.params.areaId) || 1;
 
   try {
-    const areas = await get('areas?idsOnly=1&lang=' + lang);
+    const areas = await get('areas?idsOnly=1&lang=' + lang, 3600);
     const currentArea = areas.find(area => area.id === areaId);
     if (!currentArea) {
       res.status(400).render('index', {areas, lang, error: 'Invalid area.'});
     } else {
       const restaurantIds = currentArea.restaurants.join(',');
-      const restaurants = await get(`restaurants?ids=${restaurantIds}&lang=${lang}`);
+      const restaurants = await get(`restaurants?ids=${restaurantIds}&lang=${lang}`, 3600);
       const date = moment().format('YYYY-MM-DD');
-      const menus = await get(`menus?restaurants=${restaurantIds}&days=${date}&lang=${lang}`);
+      const menus = await get(`menus?restaurants=${restaurantIds}&days=${date}&lang=${lang}`, 1800);
       res.render('index', {
         areas,
         currentArea,
