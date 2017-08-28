@@ -3,6 +3,7 @@ const twig = require('twig');
 const apicache = require('apicache');
 const fetch = require('node-fetch');
 const moment = require('moment');
+const ua = require('universal-analytics');
 
 const get = async resource => {
   const response = await fetch(`https://kitchen.kanttiinit.fi/${resource}`);
@@ -10,6 +11,11 @@ const get = async resource => {
 }
 
 express()
+.use(ua.middleware(process.env.UA_ID))
+.use((req, res, next) => {
+  req.visitor.pageview(req.originalUrl).send();
+  next();
+})
 .set('views', __dirname + '/views')
 .set('view engine', 'twig')
 .get('/:areaId?', async (req, res) => {
