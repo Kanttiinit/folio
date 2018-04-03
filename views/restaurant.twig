@@ -1,0 +1,11 @@
+{% extends 'base.twig' %}
+
+{% block content %}
+<h1 class="restaurant-name">{{restaurant.name}}</h1>
+<small class="date">{{date}}</small>
+<ul class="courses">
+  {% for course in courses %}
+  <li>{{course.title}}</li>
+  {% endfor %}
+</ul>
+{% endblock %}

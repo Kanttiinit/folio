@@ -1,82 +1,40 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Kanttiinit</title>
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-    }
+{% extends 'base.twig' %}
 
-    .area-list {
-      list-style-type: none;
-      padding: 0;
-    }
-
-    .area-list li {
-      display: inline-block;
-      margin: 0 1ch 0 0;
-    }
-
-    .current {
-      font-weight: bold;
-    }
-
-    .restaurant-list {
-      list-style-type: none;
-      padding: 0;
-    }
-    
-    .restaurant h3 {
-      margin-bottom: 0;
-    }
-
-    .restaurant-address {
-      display: block;
-      font-size: 0.8em;
-      text-decoration: none;
-      margin: 0.5ch 0 1ch;
-    }
-  </style>
-</head>
-<body>
-  {% if areas %}
-  <ul class="area-list">
-    {% for area in areas %}
-    <li class="{{ area.id == currentArea.id ? 'current' }}">
-      <a href="/{{ area.id }}?lang={{ lang }}">{{ area.name }}</a>
-    </li>
-    {% endfor %}
-  </ul>
-  {% endif %}
-  <a class="{{ lang == 'fi' ? 'current' }}" href="?lang=fi">Finnish</a>
-  <a class="{{ lang == 'en' ? 'current' }}" href="?lang=en">English</a>
-  {% if error %}
-    <p>{{ error }}</p>
-  {% endif %}
-  {% if restaurants %}
-  <ul class="restaurant-list">
-    {% for restaurant in restaurants %}
-    <li class="restaurant">
-      <a href="{{ restaurant.url }}">
-        <h3>{{ restaurant.name }}</h3>
-      </a>
-      <a class="restaurant-address" href="https://www.google.fi/maps/search/{{ restaurant.address|url_encode }}">{{ restaurant.address }}</a>
-      {% set menu = getMenus(restaurant.id) %}
-      {% if not menu %}
-      <small>No menu.</small>
-      {% else %}
-      <ul>
-        {% for course in menu %}
-        <li>{{ course.title }} {% if course.properties %}({{ course.properties.join(', ') }}){% endif %}</li>
-        {% endfor %}
-      </ul>
-      {% endif %}
-    </li>
-    {% endfor %}
-  </ul>
-  {% endif %}
-</body>
-</html>
+{% block content %}
+{% if areas %}
+<ul class="area-list">
+  {% for area in areas %}
+  <li class="{{ area.id == currentArea.id ? 'current' }}">
+    <a href="/{{ area.id }}?lang={{ lang }}">{{ area.name }}</a>
+  </li>
+  {% endfor %}
+</ul>
+{% endif %}
+<a class="{{ lang == 'fi' ? 'current' }}" href="?lang=fi">Finnish</a>
+<a class="{{ lang == 'en' ? 'current' }}" href="?lang=en">English</a>
+{% if error %}
+  <p>{{ error }}</p>
+{% endif %}
+{% if restaurants %}
+<ul class="restaurant-list">
+  {% for restaurant in restaurants %}
+  <li class="restaurant">
+    <a href="{{ restaurant.url }}">
+      <h3>{{ restaurant.name }}</h3>
+    </a>
+    <a class="restaurant-address" href="https://www.google.fi/maps/search/{{ restaurant.address|url_encode }}">{{ restaurant.address }}</a>
+    {% set menu = getMenus(restaurant.id) %}
+    {% if not menu %}
+    <small>No menu.</small>
+    {% else %}
+    <ul>
+      {% for course in menu %}
+      <li>{{ course.title }} {% if course.properties %}({{ course.properties.join(', ') }}){% endif %}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </li>
+  {% endfor %}
+</ul>
+{% endif %}
+{% endblock %}

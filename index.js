@@ -26,6 +26,22 @@ express()
 })
 .set('views', __dirname + '/views')
 .set('view engine', 'twig')
+.get('/restaurant/:restaurantId', async (req, res) => {
+  const {date = moment().format('YYYY-MM-DD'), lang = 'fi'} = req.query;
+  try {
+    const [restaurant] = await get(`restaurants?ids=${req.params.restaurantId}&lang=${lang}`);
+    const menus = await get(`menus?restaurants=${req.params.restaurantId}&days=${date}&lang=${lang}`);
+    res.render('restaurant', {
+      restaurant,
+      courses: menus[restaurant.id][date],
+      date,
+      title: restaurant.name + ' Menus'
+    });
+  } catch (e) {
+    console.log(e);
+    res.status(500).render('index', {lang, error: 'Failed to fetch data.'});
+  }
+})
 .get('/:areaId?', async (req, res) => {
   const {lang = 'fi'} = req.query;
   const areaId = Number(req.params.areaId) || 1;
@@ -41,6 +57,7 @@ express()
       const date = moment().format('YYYY-MM-DD');
       const menus = await get(`menus?restaurants=${restaurantIds}&days=${date}&lang=${lang}`, 1800);
       res.render('index', {
+        title: 'Kanttiinit: ' + currentArea.name,
         areas,
         currentArea,
         restaurants: restaurants.sort((a, b) => a.name > b.name ? 1 : -1),
