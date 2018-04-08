@@ -26,15 +26,15 @@ express()
 })
 .set('views', __dirname + '/views')
 .set('view engine', 'twig')
-.get('/restaurant/:restaurantId', async (req, res) => {
-  const {date = moment().format('YYYY-MM-DD'), lang = 'fi'} = req.query;
+.get('/restaurant', async (req, res) => {
+  const {day = moment().format('YYYY-MM-DD'), id, lang = 'fi'} = req.query;
   try {
-    const [restaurant] = await get(`restaurants?ids=${req.params.restaurantId}&lang=${lang}`);
-    const menus = await get(`menus?restaurants=${req.params.restaurantId}&days=${date}&lang=${lang}`);
+    const [restaurant] = await get(`restaurants?ids=${id}&lang=${lang}`);
+    const menus = await get(`menus?restaurants=${id}&days=${day}&lang=${lang}`);
     res.render('restaurant', {
       restaurant,
-      courses: menus[restaurant.id][date],
-      date,
+      courses: menus[restaurant.id][day],
+      day,
       title: restaurant.name + ' Menus'
     });
   } catch (e) {

@@ -3,9 +3,16 @@
 {% block content %}
 <h1 class="restaurant-name">{{restaurant.name}}</h1>
 <small class="date">{{date}}</small>
+{% if courses.length %}
 <ul class="courses">
   {% for course in courses %}
-  <li>{{course.title}}</li>
+  <li>
+    {{course.title}}
+    <em>{{course.properties.join(', ')}}</em>
+  </li>
   {% endfor %}
 </ul>
+{% else %}
+<p>No menus found.</p>
+{% endif %}
 {% endblock %}
