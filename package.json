@@ -1,6 +1,6 @@
 {
   "name": "folio",
-  "version": "2.1.1",
+  "version": "2.2.0",
   "description": "Kanttiinit without JavaScript.",
   "main": "index.js",
   "scripts": {
