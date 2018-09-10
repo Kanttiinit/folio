@@ -1,4 +1,7 @@
-{% extends 'base.twig' %} {% block content %} {% if areas %}
+{% extends 'base.twig' %}
+{% block content %}
+
+{% if areas %}
 <ul class="area-list">
   {% for area in areas %}
   <li class="{{ area.id == currentArea.id ? 'current' }}">
@@ -7,32 +10,49 @@
   {% endfor %}
 </ul>
 {% endif %}
-<a class="{{ lang == 'fi' ? 'current' }}" href="?lang=fi">Finnish</a>
-<a class="{{ lang == 'en' ? 'current' }}" href="?lang=en">English</a>
-{% if error %}
-<p>{{ error }}</p>
-{% endif %} {% if restaurants %}
+
+<a class="{{ day == 'today' ? 'current' }}" href="{{changeQueryParam('day', 'today')}}">{{ translate('today') }}</a>
+<a class="{{ day == 'tomorrow' ? 'current' }}" href="{{changeQueryParam('day', 'tomorrow')}}">{{ translate('tomorrow') }}</a> &bull;
+<a class="{{ lang == 'fi' ? 'current' }}" href="{{changeQueryParam('lang', 'fi')}}">Finnish</a>
+<a class="{{ lang == 'en' ? 'current' }}" href="{{changeQueryParam('lang', 'en')}}">English</a>
+
+{% if error %}<p>{{ error }}</p>{% endif %}
+
+{% if restaurants %}
 <ul class="restaurant-list">
   {% for restaurant in restaurants %}
-  <li class="restaurant">
-    <a href="{{ restaurant.url }}">
+  <li id="{{ slugify(restaurant.name) }}" class="restaurant">
+    <a href="#{{ slugify(restaurant.name) }}">
       <h3>{{ restaurant.name }}</h3>
     </a>
-    <a class="restaurant-address" href="https://www.google.fi/maps/search/{{ restaurant.address|url_encode }}">{{ restaurant.address
-      }}
-    </a>
-    {% set menu = getMenus(restaurant.id) %} {% if not menu %}
-    <small>No menu.</small>
+    <div class="restaurant-meta">
+      <a href="{{restaurant.url}}">{{ translate('homepage') }}</a>
+      &bull;
+      <a class="restaurant-address" href="https://www.google.fi/maps/search/{{ restaurant.address|url_encode }}">
+      {{ restaurant.address }}
+      </a>
+    </div>
+    {% set menu = getMenus(restaurant.id) %}
+    {% if not menu %}
+    <small>{{ translate('noMenu') }}</small>
     {% else %}
     <ul>
       {% for course in menu %}
-      <li>{{ course.title }} {% if course.properties %}({% spaceless %}{% for property in course.properties %}
-        <abbr title="{{explainProperty(property)}}">{{property}}</abbr>{% if not loop.last %}, {% endif %}{% endfor %}){%
-        endspaceless %}{% endif %}</li>
+      <li>{{ course.title }}
+      {% if course.properties %}
+        ({% spaceless %}
+          {% for property in course.properties %}
+            <abbr title="{{explainProperty(property)}}">{{property}}</abbr>
+            {% if not loop.last %}, {% endif %}
+          {% endfor %}
+        ){% endspaceless %}
+      {% endif %}</li>
       {% endfor %}
     </ul>
     {% endif %}
   </li>
   {% endfor %}
 </ul>
-{% endif %} {% endblock %}
+{% endif %}
+
+{% endblock %}

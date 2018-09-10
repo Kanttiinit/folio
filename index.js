@@ -4,8 +4,12 @@ const fetch = require("node-fetch");
 const moment = require("moment");
 const ua = require("universal-analytics");
 const minifyHTML = require("express-minify-html");
+const slugify = require("@sindresorhus/slugify");
+const url = require("url");
+const querystring = require("querystring");
 
 const explainProperty = require("./explainProperty");
+const translate = require("./translate");
 
 const cache = new Map();
 
@@ -21,7 +25,25 @@ const get = async (resource, ttl = 600) => {
   return data;
 };
 
-express()
+const getDate = day => {
+  const now = moment();
+  if (day === "today") {
+    return now;
+  }
+
+  if (day === "tomorrow") {
+    return now.add({ day: 1 });
+  }
+
+  return moment(day);
+};
+
+const app = express();
+
+app.locals.explainProperty = explainProperty;
+app.locals.slugify = slugify;
+
+app
   .use(
     minifyHTML({
       override: true,
@@ -39,6 +61,17 @@ express()
   .use(ua.middleware(process.env.UA_ID))
   .use((req, res, next) => {
     req.visitor.pageview(req.originalUrl).send();
+    next();
+  })
+  .use((req, res, next) => {
+    res.locals.lang = req.query.lang || "fi";
+    res.locals.translate = translate(res.locals.lang);
+    res.locals.changeQueryParam = (key, value) => {
+      const parts = url.parse(req.url, true);
+      parts.query[key] = value;
+      parts.search = querystring.stringify(parts.query);
+      return url.format(parts);
+    };
     next();
   })
   .set("views", __dirname + "/views")
@@ -61,12 +94,13 @@ express()
       res.status(500).render("index", { lang, error: "Failed to fetch data." });
     }
   })
+  .get("/robots.txt", (req, res) => res.send("User-agent: *\nDisallow:"))
   .get("/:areaId?", async (req, res) => {
-    const { lang = "fi" } = req.query;
+    const { day = "today" } = req.query;
     const areaId = Number(req.params.areaId) || 1;
 
     try {
-      const areas = await get("areas?idsOnly=1&lang=" + lang, 3600);
+      const areas = await get("areas?idsOnly=1&lang=" + res.locals.lang, 3600);
       const currentArea = areas.find(area => area.id === areaId);
       if (!currentArea) {
         res
@@ -75,12 +109,15 @@ express()
       } else {
         const restaurantIds = currentArea.restaurants.join(",");
         const restaurants = await get(
-          `restaurants?ids=${restaurantIds}&lang=${lang}`,
+          `restaurants?ids=${restaurantIds}&lang=${res.locals.lang}`,
           3600
         );
-        const date = moment().format("YYYY-MM-DD");
+        const now = moment();
+        const date = getDate(day).format("YYYY-MM-DD");
         const menus = await get(
-          `menus?restaurants=${restaurantIds}&days=${date}&lang=${lang}`,
+          `menus?restaurants=${restaurantIds}&days=${date}&lang=${
+            res.locals.lang
+          }`,
           1800
         );
         res.render("index", {
@@ -88,16 +125,13 @@ express()
           areas,
           currentArea,
           restaurants: restaurants.sort((a, b) => (a.name > b.name ? 1 : -1)),
-          lang,
-          getMenus(restaurantId) {
-            return menus[restaurantId][date];
-          },
-          explainProperty
+          getMenus: restaurantId => menus[restaurantId][date],
+          day
         });
       }
     } catch (e) {
       console.log(e);
-      res.status(500).render("index", { lang, error: "Failed to fetch data." });
+      res.status(500).render("index", { error: "Failed to fetch data." });
     }
   })
   .listen(process.env.PORT || 3000);
