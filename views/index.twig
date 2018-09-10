@@ -1,7 +1,4 @@
-{% extends 'base.twig' %}
-
-{% block content %}
-{% if areas %}
+{% extends 'base.twig' %} {% block content %} {% if areas %}
 <ul class="area-list">
   {% for area in areas %}
   <li class="{{ area.id == currentArea.id ? 'current' }}">
@@ -13,28 +10,29 @@
 <a class="{{ lang == 'fi' ? 'current' }}" href="?lang=fi">Finnish</a>
 <a class="{{ lang == 'en' ? 'current' }}" href="?lang=en">English</a>
 {% if error %}
-  <p>{{ error }}</p>
-{% endif %}
-{% if restaurants %}
+<p>{{ error }}</p>
+{% endif %} {% if restaurants %}
 <ul class="restaurant-list">
   {% for restaurant in restaurants %}
   <li class="restaurant">
     <a href="{{ restaurant.url }}">
       <h3>{{ restaurant.name }}</h3>
     </a>
-    <a class="restaurant-address" href="https://www.google.fi/maps/search/{{ restaurant.address|url_encode }}">{{ restaurant.address }}</a>
-    {% set menu = getMenus(restaurant.id) %}
-    {% if not menu %}
+    <a class="restaurant-address" href="https://www.google.fi/maps/search/{{ restaurant.address|url_encode }}">{{ restaurant.address
+      }}
+    </a>
+    {% set menu = getMenus(restaurant.id) %} {% if not menu %}
     <small>No menu.</small>
     {% else %}
     <ul>
       {% for course in menu %}
-      <li>{{ course.title }} {% if course.properties %}({{ course.properties.join(', ') }}){% endif %}</li>
+      <li>{{ course.title }} {% if course.properties %}({% spaceless %}{% for property in course.properties %}
+        <abbr title="{{explainProperty(property)}}">{{property}}</abbr>{% if not loop.last %}, {% endif %}{% endfor %}){%
+        endspaceless %}{% endif %}</li>
       {% endfor %}
     </ul>
     {% endif %}
   </li>
   {% endfor %}
 </ul>
-{% endif %}
-{% endblock %}
+{% endif %} {% endblock %}
