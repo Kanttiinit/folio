@@ -127,7 +127,7 @@ app
     }
   })
   .get("/:areaId", (req, res) =>
-    res.redirect(`/${req.query.lang || "fi"}/area/${req.params.areaId}`)
+    res.redirect(301, `/${req.query.lang || "fi"}/area/${req.params.areaId}`)
   )
   .get(/(^\/(fi|en)(\/area)?)|^\/$/, (req, res) =>
     res.redirect(`/${res.locals.lang}/area/1`)
