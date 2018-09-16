@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
+    "develop": "nodemon -e js,twig index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -28,5 +29,8 @@
     "node-fetch": "^1.7.2",
     "twig": "^1.10.5",
     "universal-analytics": "^0.4.15"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.4"
   }
 }

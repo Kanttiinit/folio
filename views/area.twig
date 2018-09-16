@@ -5,16 +5,19 @@
 <ul class="area-list">
   {% for area in areas %}
   <li class="{{ area.id == currentArea.id ? 'current' }}">
-    <a href="/{{ area.id }}?lang={{ lang }}">{{ area.name }}</a>
+    <a href="{{ changePathAt(2, area.id) }}">{{ area.name }}</a>
   </li>
   {% endfor %}
 </ul>
 {% endif %}
 
-<a class="{{ day == 'today' ? 'current' }}" href="{{changeQueryParam('day', 'today')}}">{{ translate('today') }}</a>
-<a class="{{ day == 'tomorrow' ? 'current' }}" href="{{changeQueryParam('day', 'tomorrow')}}">{{ translate('tomorrow') }}</a> &bull;
-<a class="{{ lang == 'fi' ? 'current' }}" href="{{changeQueryParam('lang', 'fi')}}">Finnish</a>
-<a class="{{ lang == 'en' ? 'current' }}" href="{{changeQueryParam('lang', 'en')}}">English</a>
+<a class="{{ isToday ? 'current' }}" href="{{changePathAt(3, '')}}">{{ translate('today') }}</a>
+<a class="{{ isTomorrow ? 'current' }}" href="{{changePathAt(3, tomorrow)}}">{{ translate('tomorrow') }}</a>
+{% if not isToday and not isTomorrow and day.isValid() %}
+<a class="current" href="{{ changePathAt(3, day.format('YYYY-MM-DD')) }}">{{ day.format('dd D/M/YYYY') }}</a>
+{% endif %} &bull;
+<a class="{{ lang == 'fi' ? 'current' }}" href="{{changePathAt(0, 'fi')}}">Finnish</a>
+<a class="{{ lang == 'en' ? 'current' }}" href="{{changePathAt(0, 'en')}}">English</a>
 
 {% if error %}<p>{{ error }}</p>{% endif %}
 

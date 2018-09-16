@@ -25,19 +25,6 @@ const get = async (resource, ttl = 600) => {
   return data;
 };
 
-const getDate = day => {
-  const now = moment();
-  if (day === "today") {
-    return now;
-  }
-
-  if (day === "tomorrow") {
-    return now.add({ day: 1 });
-  }
-
-  return moment(day);
-};
-
 const app = express();
 
 app.locals.explainProperty = explainProperty;
@@ -64,13 +51,12 @@ app
     next();
   })
   .use((req, res, next) => {
-    res.locals.lang = req.query.lang || "fi";
+    res.locals.lang = req.path.split("/")[1] || "fi";
     res.locals.translate = translate(res.locals.lang);
-    res.locals.changeQueryParam = (key, value) => {
-      const parts = url.parse(req.url, true);
-      parts.query[key] = value;
-      parts.search = querystring.stringify(parts.query);
-      return url.format(parts);
+    res.locals.changePathAt = (index, value) => {
+      const parts = req.path.split("/");
+      parts[index + 1] = value;
+      return parts.join("/");
     };
     next();
   })
@@ -95,17 +81,19 @@ app
     }
   })
   .get("/robots.txt", (req, res) => res.send("User-agent: *\nDisallow:"))
-  .get("/:areaId?", async (req, res) => {
-    const { day = "today" } = req.query;
+  .get("/:lang/area/:areaId/:day?", async (req, res) => {
+    const day = moment(req.params.day);
     const areaId = Number(req.params.areaId) || 1;
 
     try {
       const areas = await get("areas?idsOnly=1&lang=" + res.locals.lang, 3600);
       const currentArea = areas.find(area => area.id === areaId);
       if (!currentArea) {
+        res.status(400).render("area", { areas, error: "Invalid area." });
+      } else if (!day.isValid()) {
         res
           .status(400)
-          .render("index", { areas, lang, error: "Invalid area." });
+          .render("area", { areas, currentArea, error: "Invalid date." });
       } else {
         const restaurantIds = currentArea.restaurants.join(",");
         const restaurants = await get(
@@ -113,20 +101,24 @@ app
           3600
         );
         const now = moment();
-        const date = getDate(day).format("YYYY-MM-DD");
+        const tomorrow = now.clone().add({ days: 1 });
+        const date = day.format("YYYY-MM-DD");
         const menus = await get(
           `menus?restaurants=${restaurantIds}&days=${date}&lang=${
             res.locals.lang
           }`,
           1800
         );
-        res.render("index", {
+        res.render("area", {
           title: "Kanttiinit: " + currentArea.name,
           areas,
           currentArea,
+          isToday: now.isSame(day, "day"),
+          isTomorrow: tomorrow.isSame(day, "day"),
           restaurants: restaurants.sort((a, b) => (a.name > b.name ? 1 : -1)),
           getMenus: restaurantId => menus[restaurantId][date],
-          day
+          day,
+          tomorrow: tomorrow.format("YYYY-MM-DD")
         });
       }
     } catch (e) {
@@ -134,4 +126,10 @@ app
       res.status(500).render("index", { error: "Failed to fetch data." });
     }
   })
+  .get("/:areaId", (req, res) =>
+    res.redirect(`/${req.query.lang || "fi"}/area/${req.params.areaId}`)
+  )
+  .get(/(^\/(fi|en)(\/area)?)|^\/$/, (req, res) =>
+    res.redirect(`/${res.locals.lang}/area/1`)
+  )
   .listen(process.env.PORT || 3000);
