@@ -35,12 +35,11 @@
       {{ restaurant.address }}
       </a>
     </div>
-    {% set menu = getMenus(restaurant.id) %}
-    {% if not menu %}
+    {% if not restaurant.menus %}
     <small>{{ translate('noMenu') }}</small>
     {% else %}
     <ul>
-      {% for course in menu %}
+      {% for course in restaurant.menus[0].courses %}
       <li>{{ course.title }}
       {% if course.properties %}
         ({% spaceless %}
