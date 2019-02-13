@@ -29,17 +29,20 @@
       <h3>{{ restaurant.name }}</h3>
     </a>
     <div class="restaurant-meta">
+      {{ weekday }}
+      {{ restaurant.openingHours[weekdayIndex] }}
+      &bull;
       <a href="{{restaurant.url}}">{{ translate('homepage') }}</a>
       &bull;
       <a class="restaurant-address" href="https://www.google.fi/maps/search/{{ restaurant.address|url_encode }}">
       {{ restaurant.address }}
       </a>
     </div>
-    {% if not restaurant.menus %}
+    {% if not restaurant.menu %}
     <small>{{ translate('noMenu') }}</small>
     {% else %}
     <ul>
-      {% for course in restaurant.menus[0].courses %}
+      {% for course in restaurant.menu.courses %}
       <li>{{ course.title }}
       {% if course.properties %}
         ({% spaceless %}

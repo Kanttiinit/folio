@@ -54,7 +54,7 @@ app
         {
           restaurant(id: ${id}, lang: ${lang}) {
             name
-            menus(day: "${day}") {
+            menu(day: "${day}") {
               courses {
                 title
                 properties
@@ -104,7 +104,8 @@ app
               name
               address
               url
-              menus(day: "${date}") {
+              openingHours
+              menu(day: "${date}") {
                 courses {
                   title
                   properties
@@ -124,6 +125,8 @@ app
           title: "Kanttiinit: " + data.area.name,
           areas: data.areas,
           currentArea: data.area,
+          weekday: day.format("ddd"),
+          weekdayIndex: day.get("isoWeekday"),
           isToday: now.isSame(day, "day"),
           isTomorrow: tomorrow.isSame(day, "day"),
           restaurants: data.area.restaurants.sort((a, b) =>
