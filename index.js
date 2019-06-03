@@ -12,6 +12,8 @@ const translate = require("./translate");
 
 const app = express();
 
+const kitchenURL = "http://localhost:3000"; //"https://kitchen.kanttiinit.fi";
+
 app.locals.explainProperty = explainProperty;
 app.locals.slugify = slugify;
 
@@ -54,19 +56,14 @@ app
         {
           restaurant(id: ${id}, lang: ${lang}) {
             name
-            menu(day: "${day}") {
-              courses {
-                title
-                properties
-              }
+            courses(day: "${day}") {
+              title
+              properties
             }
           }
         }
       `;
-      const data = await request(
-        "https://kitchen.kanttiinit.fi/graphql",
-        query
-      );
+      const data = await request(`${kitchenURL}/graphql`, query);
       res.render("restaurant", {
         restaurant: data.restaurant,
         day,
@@ -105,20 +102,15 @@ app
               address
               url
               openingHours
-              menu(day: "${date}") {
-                courses {
-                  title
-                  properties
-                }
+              courses(day: "${date}") {
+                title
+                properties
               }
             }
           }
         }
       `;
-        const data = await request(
-          "https://kitchen.kanttiinit.fi/graphql",
-          query
-        );
+        const data = await request(`${kitchenURL}/graphql`, query);
         const now = moment();
         const tomorrow = now.clone().add({ days: 1 });
         res.render("area", {
