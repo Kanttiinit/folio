@@ -12,7 +12,7 @@ const translate = require("./translate");
 
 const app = express();
 
-const kitchenURL = "http://localhost:3000"; //"https://kitchen.kanttiinit.fi";
+const kitchenURL = "https://kitchen.kanttiinit.fi";
 
 app.locals.explainProperty = explainProperty;
 app.locals.slugify = slugify;
