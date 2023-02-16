@@ -142,4 +142,4 @@ app
   .get(/(^\/(fi|en)(\/area)?)|^\/$/, (req, res) =>
     res.redirect(`/${res.locals.lang}/area/1`)
   )
-  .listen(process.env.PORT || 3000, '127.0.0.1');
+  .listen(process.env.PORT || 3000, '0.0.0.0');
