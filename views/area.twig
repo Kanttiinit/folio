@@ -38,11 +38,11 @@
       {{ restaurant.address }}
       </a>
     </div>
-    {% if not restaurant.courses.length %}
+    {% if not menus[restaurant.id][date].length %}
     <small>{{ translate('noMenu') }}</small>
     {% else %}
     <ul>
-      {% for course in restaurant.courses %}
+      {% for course in menus[restaurant.id][date] %}
       <li>{{ course.title }}
       {% if course.properties %}
         ({% spaceless %}

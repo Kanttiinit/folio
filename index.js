@@ -53,22 +53,11 @@ app
   .get("/restaurant", async (req, res) => {
     const { day = moment().format("YYYY-MM-DD"), id, lang = "fi" } = req.query;
     try {
-      const query = `
-        {
-          restaurant(id: ${id}, lang: ${lang}) {
-            name
-            courses(day: "${day}") {
-              title
-              properties
-            }
-          }
-        }
-      `;
-      const data = await request(`${kitchenURL}/graphql`, query);
+      const restaurant = await (await fetch(`${kitchenURL}/restaurants/${id}/menu?day=${day}&lang=${lang}`)).json();
       res.render("restaurant", {
-        restaurant: data.restaurant,
+        restaurant: restaurant,
         day,
-        title: data.restaurant.name + " Menus"
+        title: restaurant.name + " Menus"
       });
     } catch (e) {
       console.log(e);
@@ -82,49 +71,30 @@ app
     const day = moment(req.params.day);
     const areaId = Number(req.params.areaId) || 1;
     const date = day.format("YYYY-MM-DD");
-
     try {
       if (!day.isValid()) {
         res
           .status(400)
           .render("area", { areas, currentArea, error: "Invalid date." });
       } else {
-        const query = `
-        {
-          areas(lang: ${res.locals.lang}) {
-            id
-            name
-          }
-          area(id: ${areaId}, lang: ${res.locals.lang}) {
-            id
-            name
-            restaurants {
-              name
-              address
-              url
-              openingHours
-              courses(day: "${date}") {
-                title
-                properties
-              }
-            }
-          }
-        }
-      `;
-        const data = await request(`${kitchenURL}/graphql`, query);
+        const areas = await (await fetch(`${kitchenURL}/areas?lang=${req.params.lang}`)).json();
+        const area = areas.find(a => a.id === areaId);
+        const menus = await (await fetch(`${kitchenURL}/menus?restaurants=${area.restaurants.map(r => r.id).join(',')}&day=${date}&lang=${req.params.lang}`)).json();
         const now = moment();
         const tomorrow = now.clone().add({ days: 1 });
         res.render("area", {
-          title: "Kanttiinit: " + data.area.name,
-          areas: data.areas,
-          currentArea: data.area,
+          title: "Kanttiinit: " + area.name,
+          areas: areas,
+          currentArea: area,
           weekday: day.format("ddd"),
           weekdayIndex: day.get("isoWeekday"),
           isToday: now.isSame(day, "day"),
           isTomorrow: tomorrow.isSame(day, "day"),
-          restaurants: data.area.restaurants.sort((a, b) =>
+          restaurants: area.restaurants.sort((a, b) =>
             a.name > b.name ? 1 : -1
           ),
+          date,
+          menus,
           day,
           tomorrow: tomorrow.format("YYYY-MM-DD")
         });
