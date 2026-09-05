@@ -5,6 +5,7 @@ import moment from 'moment';
 import Area from './views/Area.tsx';
 import Layout from './views/Layout.tsx';
 import RestaurantPage from './views/Restaurant.tsx';
+import { trimTrailingSlash } from 'hono/trailing-slash';
 
 type Variables = { lang: 'fi' | 'en' };
 
@@ -13,6 +14,7 @@ const app = new Hono<{ Variables: Variables }>();
 const kitchenURL = 'https://kitchen.kanttiinit.fi';
 
 app
+  .use(trimTrailingSlash())
   .use(compress())
   .use(async (c, next) => {
     const langParsed = c.req.path.split('/')[1];
