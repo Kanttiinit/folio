@@ -1,0 +1,79 @@
+import { FC, PropsWithChildren } from 'hono/jsx';
+import { raw } from 'hono/html';
+
+const styles = `
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+}
+
+small {
+  font-style: italic;
+}
+
+.area-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.area-list li {
+  display: inline-block;
+  margin: 0 1ch 0 0;
+}
+
+.current {
+  font-weight: bold;
+}
+
+.restaurant-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.restaurant h3 {
+  margin-bottom: 0;
+}
+
+.restaurant-meta {
+  display: block;
+  font-size: 0.8em;
+  text-decoration: none;
+  margin: 0.5ch 0 1ch;
+}
+
+abbr {
+  cursor: help;
+  text-decoration: none;
+}
+
+abbr:hover {
+  text-decoration: underline dotted;
+}
+
+a:link,
+a:hover,
+a:active,
+a:visited {
+  color: #0967b3;
+}
+`;
+
+const Layout: FC<PropsWithChildren<{ title: string }>> = (props) => {
+  return (
+    <html lang='en'>
+      <head>
+        <meta charset='UTF-8' />
+        <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+        <meta
+          name='description'
+          content='Kanttiinit.fi näyttää kätevästi Otaniemen sekä Helsingin opiskelijaruokaloiden ruokalistat.'
+        />
+        <meta http-equiv='X-UA-Compatible' content='ie=edge' />
+        <title>{props.title}</title>
+        <style>{raw(styles)}</style>
+      </head>
+      <body>{props.children}</body>
+    </html>
+  );
+};
+
+export default Layout;
